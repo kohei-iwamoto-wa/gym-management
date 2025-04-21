@@ -1,0 +1,24 @@
+@startuml
+
+left to right direction
+actor "ジム利用者" as gu
+actor "ジム管理者" as ga
+rectangle ジム予約管理システム {
+usecase "ジム混雑状況確認する" as UC1
+usecase "機材の予約登録・更新・削除する" as UC2
+usecase "店舗マスタの参照・登録・更新・削除" as UC3
+usecase "機材マスタの参照・登録・更新・削除" as UC4
+usecase "ユーザマスタの参照・登録・更新・削除" as UC5
+}
+' ジム利用者のユースケース
+gu --> UC1
+gu --> UC2
+gu --> UC3
+
+' ジム管理者のユースケース
+ga --> UC1
+ga --> UC2
+ga --> UC3
+ga --> UC4
+ga --> UC5
+@enduml
