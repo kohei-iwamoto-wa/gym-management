@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ECSの暗号化
+
+Parameters:
+  ProjectName:
+    Description: Project Name
+    Type: String
+
+Resources:
+  EcsKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key of ECS Cluster
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowAccountRoot
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: AllowECSService
+            Effect: Allow
+            Principal:
+              Service: ecs.amazonaws.com
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: '*'
+
+  EcsKmsAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/{ProjectName}-ecs-kms-key'
+      TargetKeyId: !Ref EcsKmsKey
