@@ -6,7 +6,7 @@ from botocore.exceptions import ClientError
 app = FastAPI()
 
 # DynamoDB接続
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000', region_name='us-west-2')
+dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8001', region_name='us-west-2')
 table_name = 'Users'
 table = dynamodb.Table(table_name)
 
