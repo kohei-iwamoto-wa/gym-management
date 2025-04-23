@@ -16,5 +16,11 @@ aws dynamodb create-table --table-name Users --attribute-definitions AttributeNa
 DynamoDBのテーブルにデータを流し込む
 aws dynamodb put-item --table-name Users --item "{\"UserID\":{\"S\":\"user123\"},\"Name\":{\"S\":\"Alice\"},\"Age\":{\"N\":\"30\"}}"
 ```
+```
+DynamoDBのデータを取得する。
+aws dynamodb get-item --table-name Users --key "{\"UserID\":{\"S\":\"user123\"}}" --endpoint-url http://localhost:8000
+```
+
+
 ※ DynamoDB Localに対して実行する場合は、 `--endpoint-url http://localhost:8001` オプションを付与する必要がある。
 
