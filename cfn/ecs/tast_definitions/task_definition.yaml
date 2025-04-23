@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ECS Cluster of GymManagement
+
+Parameters:
+  ProjectName:
+    Description: Project Name
+    Type: String
+
+Resources:
+  MinimalFargateTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: current-crowd-condition-task
+      Cpu: '256'
+      Memory: '512'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt EcsTaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: my-ecr-container
+          Image: ''
+          Essential: true
+          PortMappings:
+            - ContainerPort: 80
+              HostPort: 80
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/my-app
+              awslogs-region: ${AWS::Region}
+              awslogs-stream-prefix: ecs
+      RuntimePlatform:
+        CpuArchitecture: X86_64
+        OperatingSystemFamily: LINUX
