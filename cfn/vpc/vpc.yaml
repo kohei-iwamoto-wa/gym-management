@@ -1,13 +1,14 @@
+AWSTemplateFormatVersion: 2010-09-09
 Description: ジム管理システムのVPC
 
 Parameters:
   ProjectName:
-    Description: プロジェクト名
+    Description: Project Name
     Type: String
 
-#---------------------------------------------#
-# CIDR BLOCK                                  #
-#---------------------------------------------#
+  #---------------------------------------------#
+  # CIDR BLOCK                                  #
+  #---------------------------------------------#
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
@@ -24,9 +25,9 @@ Parameters:
     Default: 192.168.2.0/23
 
 Resources:
-#---------------------------------------------#
-# VPC                                         #
-#---------------------------------------------#
+  #---------------------------------------------#
+  # VPC                                         #
+  #---------------------------------------------#
   GymManagementVPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -35,16 +36,16 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-vpc"
+          Value: !Sub '${ProjectName}-vpc'
 
-#---------------------------------------------#
-# Subnet                                      #
-#---------------------------------------------#
+  #---------------------------------------------#
+  # Subnet                                      #
+  #---------------------------------------------#
   EcsPrivateSubnet:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref GymManagementVPC
-      AvailabilityZone: !Select [ 0, !GetAZs  '' ]
+      AvailabilityZone: !Select [0, !GetAZs '']
       CidrBlock: !Ref PrivateSubnetEcsCIDR
       MapPublicIpOnLaunch: false
       Tags:
@@ -55,17 +56,16 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref GymManagementVPC
-      AvailabilityZone: !Select [ 0, !GetAZs  '' ]
+      AvailabilityZone: !Select [0, !GetAZs '']
       CidrBlock: !Ref PrivateSubnetDbCIDR
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-db-private-subnet
 
-
-#---------------------------------------------#
-# Route Table                                 #
-#---------------------------------------------#
+  #---------------------------------------------#
+  # Route Table                                 #
+  #---------------------------------------------#
 
   EcsPrivateRouteTable:
     Type: AWS::EC2::RouteTable
@@ -73,44 +73,44 @@ Resources:
       VpcId: !Ref GymManagementVPC
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-ecs-private-route-table"
+          Value: !Sub '${ProjectName}-ecs-private-route-table'
 
   DynamoDbVPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
     DependsOn: EcsPrivateRouteTable
     Properties:
-      ServiceName: !Sub "com.amazonaws.${AWS::Region}.dynamodb"
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.dynamodb'
       VpcId: !Ref GymManagementVPC
       VpcEndpointType: Gateway
       RouteTableIds:
         - !Ref EcsPrivateRouteTable
       Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-dynamodb-vpc-endpoint"
+          Value: !Sub '${ProjectName}-dynamodb-vpc-endpoint'
 
-#---------------------------------------------#
-# Security Group                              #
-#---------------------------------------------#
+  #---------------------------------------------#
+  # Security Group                              #
+  #---------------------------------------------#
   SgDbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Sub "${ProjectName}sg-db-security-group"
-      GroupName: !Sub "${ProjectName}-sg-db-security-group"
+      GroupDescription: !Sub '${ProjectName}sg-db-security-group'
+      GroupName: !Sub '${ProjectName}-sg-db-security-group'
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306
           SourceSecurityGroupId: !Ref SgEcsSecurityGroup
-      Tags: 
+      Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-sg-db"
+          Value: !Sub '${ProjectName}-sg-db'
       VpcId: !Ref GymManagementVPC
 
   SgEcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: !Sub "${ProjectName}-sg-ecs-security-group"
-      GroupName: !Sub "${ProjectName}-sg-ecs-security-group"
+      GroupDescription: !Sub '${ProjectName}-sg-ecs-security-group'
+      GroupName: !Sub '${ProjectName}-sg-ecs-security-group'
       # ALBを構築した際、コメントアウトを外す。
       # SecurityGroupIngress:
       #   - IpProtocol: tcp
@@ -122,8 +122,7 @@ Resources:
           FromPort: 3306
           ToPort: 3306
           CidrIp: !Ref PrivateSubnetDbCIDR
-      Tags: 
+      Tags:
         - Key: Name
-          Value: !Sub "${ProjectName}-sg-ecs"
+          Value: !Sub '${ProjectName}-sg-ecs'
       VpcId: !Ref GymManagementVPC
-

@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ECS Cluster of GymManagement
+
+Parameters:
+  ProjectName:
+    Description: Project Name
+    Type: String
+
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: gym-management-cluster
+      CapacityProviders:
+        - FARGATE
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
