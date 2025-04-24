@@ -12,9 +12,9 @@ Parameters:
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
-    Default: 192.168.0.0/22
+    Default: 192.168.0.0/20
 
-  PrivateSubnetEcsCIDR:
+  AZ1PrivateSubnetEcsCIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
     Default: 192.168.0.0/23
@@ -23,6 +23,21 @@ Parameters:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
     Default: 192.168.2.0/23
+
+  AZ2PrivateSubnetEcsCIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    Type: String
+    Default: 192.168.4.0/23
+
+  AZ1PublicSubnetEcsCIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    Type: String
+    Default: 192.168.6.0/23
+
+  AZ2PublicSubnetEcsCIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    Type: String
+    Default: 192.168.8.0/23
 
 Resources:
   #---------------------------------------------#
@@ -41,12 +56,45 @@ Resources:
   #---------------------------------------------#
   # Subnet                                      #
   #---------------------------------------------#
-  EcsPrivateSubnet:
+  EcsPublicSubnetAZ1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref GymManagementVPC
       AvailabilityZone: !Select [0, !GetAZs '']
-      CidrBlock: !Ref PrivateSubnetEcsCIDR
+      CidrBlock: !Ref AZ1PublicSubnetEcsCIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-ecs-public-subnet1
+
+  EcsPublicSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref GymManagementVPC
+      AvailabilityZone: !Select [2, !GetAZs '']
+      CidrBlock: !Ref AZ2PublicSubnetEcsCIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-ecs-public-subnet2
+
+  EcsPrivateSubnetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref GymManagementVPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Ref AZ1PrivateSubnetEcsCIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-ecs-private-subnet
+
+  EcsPrivateSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref GymManagementVPC
+      AvailabilityZone: !Select [2, !GetAZs '']
+      CidrBlock: !Ref AZ2PrivateSubnetEcsCIDR
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
@@ -64,8 +112,78 @@ Resources:
           Value: !Sub ${ProjectName}-db-private-subnet
 
   #---------------------------------------------#
+  # Internet Gateway                            #
+  #---------------------------------------------#
+  GymManagementInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-internet-gateway'
+
+  GymManagementAttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref GymManagementVPC
+      InternetGatewayId: !Ref GymManagementInternetGateway
+
+  #---------------------------------------------#
+  # NAT Gateway                                 #
+  #---------------------------------------------#
+  # NatGatewayEIP:
+  #   Type: AWS::EC2::EIP
+  #   Properties:
+  #     Domain: vpc
+
+  # NatGateway:
+  #   Type: AWS::EC2::NatGateway
+  #   Properties:
+  #     AllocationId: !GetAtt NatGatewayEIP.AllocationId
+  #     SubnetId: !Ref EcsPublicSubnetAZ1
+  #     Tags:
+  #       - Key: Name
+  #         Value: NATGateway
+
+  #---------------------------------------------#
   # Route Table                                 #
   #---------------------------------------------#
+  Az1PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref GymManagementVPC
+
+  Az1PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GymManagementAttachGateway
+    Properties:
+      RouteTableId: !Ref Az1PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref GymManagementInternetGateway
+
+  Az1PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref EcsPublicSubnetAZ1
+      RouteTableId: !Ref Az1PublicRouteTable
+
+  Az2PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref GymManagementVPC
+
+  Az2PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GymManagementAttachGateway
+    Properties:
+      RouteTableId: !Ref Az2PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref GymManagementInternetGateway
+
+  Az2PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref EcsPublicSubnetAZ2
+      RouteTableId: !Ref Az2PublicRouteTable
 
   EcsPrivateRouteTable:
     Type: AWS::EC2::RouteTable
