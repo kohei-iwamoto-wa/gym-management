@@ -1,12 +1,16 @@
 from typing import Union
 from fastapi import FastAPI
+import logging
 import boto3
 from botocore.exceptions import ClientError
 
 app = FastAPI()
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # DynamoDB接続
-dynamodb = boto3.resource('dynamodb', endpoint_url='http://localhost:8001', region_name='us-west-2')
+dynamodb = boto3.resource('dynamodb', endpoint_url='http://dynamodb-local:8000', region_name='us-west-2')
 table_name = 'Users'
 table = dynamodb.Table(table_name)
 
@@ -21,20 +25,19 @@ def read_item(item_id: int, q: Union[str, None] = None):
 @app.get("/ping-dynamodb")
 def ping_dynamodb():
     try:
-        # データを put
-        put_response = table.put_item(Item={"UserID": "test001", "name": "Sample Name", "age": 25})
-
-        # データを get
-        get_response = table.get_item(Key={"UserID": "test001"})
+        logger.info("Fetching item from DynamoDB")
+        get_response = table.get_item(Key={"UserID": "user123"})
+        logger.info(f"DynamoDB get response: {get_response}")
+        
         item = get_response.get("Item", {})
-
-        return {
-            "put_result": "success",
-            "get_result": "success" if item else "not_found",
-            "item": item
-        }
+        logger.info(f"Retrieved item: {item}")
+        
+        # 正常なレスポンスを返す
+        return {"get_result": "success", "item": item}
 
     except ClientError as e:
-        return {
-            "error": e.response["Error"]["Message"]
-        }
+        logger.error(f"ClientError occurred: {e.response['Error']['Message']}")
+        return {"error": e.response["Error"]["Message"]}
+    except Exception as e:
+        logger.error(f"Unexpected error occurred: {str(e)}")
+        return {"error": "Internal Server Error"}
