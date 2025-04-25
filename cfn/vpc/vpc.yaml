@@ -382,3 +382,25 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${ProjectName}-s3-vpc-endpoint'
+
+Outputs:
+  GymManagementVPC:
+    Value: !Ref GymManagementVPC
+    Export:
+      Name: GymManagementVPC
+  SgEcsSecurityGroup:
+    Value: !Ref SgEcsSecurityGroup
+    Export:
+      Name: SgEcsSecurityGroup
+  AlbSecurityGroup:
+    Value: !Ref AlbSecurityGroup
+    Export:
+      Name: AlbSecurityGroup
+  EcsPublicSubnetAZ1:
+    Value: !Ref EcsPublicSubnetAZ1
+    Export:
+      Name: EcsPublicSubnetAZ1
+  EcsPublicSubnetAZ2:
+    Value: !Ref EcsPublicSubnetAZ2
+    Export:
+      Name: EcsPublicSubnetAZ2

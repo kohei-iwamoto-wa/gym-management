@@ -16,3 +16,8 @@ Resources:
       ClusterSettings:
         - Name: containerInsights
           Value: enabled
+Outputs:
+  ECSCluster:
+    Value: !Ref ECSCluster
+    Export:
+      Name: ECSCluster
