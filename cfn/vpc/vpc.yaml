@@ -262,11 +262,23 @@ Resources:
           FromPort: 80
           ToPort: 80
           SourceSecurityGroupId: !Ref AlbSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306
           CidrIp: !Ref PrivateSubnetDbCIDR
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
           Value: !Sub '${ProjectName}-sg-ecs'
@@ -279,8 +291,8 @@ Resources:
       VpcId: !Ref GymManagementVPC
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+          FromPort: 8080
+          ToPort: 8080
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
           FromPort: 443
@@ -304,7 +316,18 @@ Resources:
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-          CidrIp: 192.168.0.0/20
+          CidrIp: 0.0.0.0/0
+
+  CloudWatchVpcEndpointSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTPS for VPC Endpoints
+      VpcId: !Ref GymManagementVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
 
   #---------------------------------------------#
   # VPC Endpoint                                #
@@ -334,6 +357,19 @@ Resources:
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - !Ref EcrVpcEndpointSg
+
+  CloudWatchEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
+      VpcId: !Ref GymManagementVPC
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref EcsPrivateSubnetAZ1
+        - !Ref EcsPrivateSubnetAZ2
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref CloudWatchVpcEndpointSg
 
   S3VPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
