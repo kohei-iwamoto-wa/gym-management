@@ -127,19 +127,33 @@ Resources:
       VpcId: !Ref GymManagementVPC
       InternetGatewayId: !Ref GymManagementInternetGateway
 
-  #---------------------------------------------#
-  # NAT Gateway                                 #
-  #---------------------------------------------#
-  # NatGatewayEIP:
+  # #---------------------------------------------#
+  # # NAT Gateway                                 #
+  # #---------------------------------------------#
+  # Az1NatGatewayEIP:
   #   Type: AWS::EC2::EIP
   #   Properties:
   #     Domain: vpc
 
-  # NatGateway:
+  # Az1NatGateway:
+  #   Type: AWS::EC2::NatGateway
+  #   Properties:
+  #     AllocationId: !GetAtt Az1NatGatewayEIP.AllocationId
+  #     SubnetId: !Ref EcsPublicSubnetAZ1
+  #     Tags:
+  #       - Key: Name
+  #         Value: NATGateway
+
+  # Az2NatGatewayEIP:
+  #   Type: AWS::EC2::EIP
+  #   Properties:
+  #     Domain: vpc
+
+  # Az2NatGateway:
   #   Type: AWS::EC2::NatGateway
   #   Properties:
   #     AllocationId: !GetAtt NatGatewayEIP.AllocationId
-  #     SubnetId: !Ref EcsPublicSubnetAZ1
+  #     SubnetId: !Ref EcsPublicSubnetAZ2
   #     Tags:
   #       - Key: Name
   #         Value: NATGateway
@@ -206,6 +220,18 @@ Resources:
         - Key: Name
           Value: !Sub '${ProjectName}-dynamodb-vpc-endpoint'
 
+  EcsPrivateSubnetAZ1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref EcsPrivateSubnetAZ1
+      RouteTableId: !Ref EcsPrivateRouteTable
+
+  EcsPrivateSubnetAZ2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref EcsPrivateSubnetAZ2
+      RouteTableId: !Ref EcsPrivateRouteTable
+
   #---------------------------------------------#
   # Security Group                              #
   #---------------------------------------------#
@@ -226,15 +252,16 @@ Resources:
 
   SgEcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
+    DependsOn: AlbSecurityGroup
     Properties:
       GroupDescription: !Sub '${ProjectName}-sg-ecs-security-group'
       GroupName: !Sub '${ProjectName}-sg-ecs-security-group'
       # ALBを構築した際、コメントアウトを外す。
-      # SecurityGroupIngress:
-      #   - IpProtocol: tcp
-      #     FromPort: 80
-      #     ToPort: 80
-      #     SourceSecurityGroupId: !Ref ALBSecurityGroup
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 3306
@@ -244,3 +271,78 @@ Resources:
         - Key: Name
           Value: !Sub '${ProjectName}-sg-ecs'
       VpcId: !Ref GymManagementVPC
+
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for Application Load Balancer
+      VpcId: !Ref GymManagementVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-alb-sg'
+
+  EcrVpcEndpointSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTPS for VPC Endpoints
+      VpcId: !Ref GymManagementVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 192.168.0.0/20
+
+  #---------------------------------------------#
+  # VPC Endpoint                                #
+  #---------------------------------------------#
+  ECRApiEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
+      VpcId: !Ref GymManagementVPC
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref EcsPrivateSubnetAZ1
+        - !Ref EcsPrivateSubnetAZ2
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref EcrVpcEndpointSg
+
+  ECRDockerEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
+      VpcId: !Ref GymManagementVPC
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref EcsPrivateSubnetAZ1
+        - !Ref EcsPrivateSubnetAZ2
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref EcrVpcEndpointSg
+
+  S3VPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      VpcId: !Ref GymManagementVPC
+      VpcEndpointType: Gateway
+      RouteTableIds:
+        - !Ref EcsPrivateRouteTable
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-s3-vpc-endpoint'
