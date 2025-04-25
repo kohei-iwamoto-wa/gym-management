@@ -10,9 +10,9 @@ Resources:
   EcsTaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub '${ProjectName}-ecs-task-execution-role'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
-        RoleName: !Sub '${ProjectName}-ecs-task-execution-role'
         Statement:
           - Effect: Allow
             Principal:
@@ -20,8 +20,38 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  EcsTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-ecs-task-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DynamoDBAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:Scan'
+                  - 'dynamodb:UpdateItem'
+                Resource: 'arn:aws:dynamodb:*'
+
 Outputs:
   EcsTaskExecutionRole:
     Value: !Ref EcsTaskExecutionRole
     Export:
       Name: EcsTaskExecutionRole
+  EcsTaskRole:
+    Value: !Ref EcsTaskRole
+    Export:
+      Name: EcsTaskRole
