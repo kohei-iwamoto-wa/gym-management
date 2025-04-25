@@ -41,4 +41,4 @@ def ping_dynamodb():
         return {"error": e.response["Error"]["Message"]}
     except Exception as e:
         logger.error(f"Unexpected error occurred: {str(e)}")
-        return {"error": "Internal Server Error"}
+        return {"error": f"Internal Server Error: {e}"}
