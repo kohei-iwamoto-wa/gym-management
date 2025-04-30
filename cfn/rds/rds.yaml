@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ECS Cluster of GymManagement
+
+Parameters:
+  ProjectName:
+    Description: Project Name
+    Type: String
+
+Resources:
+  # Clusterとパラメーターグループとサブネットグループ
+  RDSDBCluster:
+    Type: 'AWS::RDS::DBCluster'
+    Properties:
+      AvailabilityZones:
+        - !Select [0, !GetAZs '']
+      BackupRetentionPeriod: 7
+      DBClusterIdentifier: !Sub '${ProjectName}-database'
+      # DBClusterParameterGroupName: 'default.aurora-postgresql14'
+      # Subnet group 作成する
+      DBSubnetGroupName: 'default-vpc-xxxxxx'
+      Engine: 'aurora-mysql'
+      Port: 3306
+      MasterUsername: 'admin_user'
+      MasterUserPassword: 'REPLACEME'
+      PreferredBackupWindow: '17:20-17:50'
+      # PreferredMaintenanceWindow: 'thu:15:30-thu:16:00'
+      VpcSecurityGroupIds:
+        - !ImportValue 'SgDbSecurityGroup'
+      StorageEncrypted: true
+      EnableIAMDatabaseAuthentication: false
+      EngineMode: 'provisioned'
+      DeletionProtection: false
+      EnableHttpEndpoint: false
+
+  AuroraSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Description of subnet group
+      SubnetIds:
+        - subnet-7b5b4112
+        - subnet-7b5b4115
+      Tags:
+        - Key: mykey
+          Value: myvalue
