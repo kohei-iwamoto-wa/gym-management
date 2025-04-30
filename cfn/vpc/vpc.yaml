@@ -328,6 +328,7 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
+      SourceSecurityGroupId: !Ref SgEcsSecurityGroup
 
   #---------------------------------------------#
   # VPC Endpoint                                #
@@ -344,6 +345,9 @@ Resources:
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - !Ref EcrVpcEndpointSg
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-ecr-api-endpoint'
 
   ECRDockerEndpoint:
     Type: AWS::EC2::VPCEndpoint
@@ -357,6 +361,9 @@ Resources:
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - !Ref EcrVpcEndpointSg
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-dcr-endpoint'
 
   CloudWatchEndpoint:
     Type: AWS::EC2::VPCEndpoint
@@ -370,6 +377,9 @@ Resources:
       PrivateDnsEnabled: true
       SecurityGroupIds:
         - !Ref CloudWatchVpcEndpointSg
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-logs-vpc-endpoint'
 
   S3VPCEndpoint:
     Type: AWS::EC2::VPCEndpoint
@@ -404,3 +414,11 @@ Outputs:
     Value: !Ref EcsPublicSubnetAZ2
     Export:
       Name: EcsPublicSubnetAZ2
+  EcsPrivateSubnetAZ1:
+    Value: !Ref EcsPrivateSubnetAZ1
+    Export:
+      Name: EcsPrivateSubnetAZ1
+  EcsPrivateSubnetAZ2:
+    Value: !Ref EcsPrivateSubnetAZ2
+    Export:
+      Name: EcsPrivateSubnetAZ2

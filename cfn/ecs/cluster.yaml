@@ -16,8 +16,51 @@ Resources:
       ClusterSettings:
         - Name: containerInsights
           Value: enabled
-Outputs:
-  ECSCluster:
-    Value: !Ref ECSCluster
-    Export:
-      Name: ECSCluster
+
+  ConnectDynamoFargateTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - Name: dynamo
+          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/test-dynamodb-connection'
+          Cpu: 0
+          PortMappings:
+            - Name: dynamo-test
+              ContainerPort: 8080
+              HostPort: 8080
+              Protocol: tcp
+              AppProtocol: http
+          Essential: true
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/gym-management
+              awslogs-region: !Sub ${AWS::Region}
+              awslogs-stream-prefix: ecs
+      Family: gym-management
+      TaskRoleArn: !Sub 'arn:aws:iam::${AWS::AccountId}:role/gym-management-ecs-task-role'
+      ExecutionRoleArn: !Sub 'arn:aws:iam::${AWS::AccountId}:role/gym-management-ecs-task-execution-role'
+      NetworkMode: awsvpc
+      Cpu: 1024
+      Memory: 3072
+
+  OccupancyStatusECSService:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      ServiceName: occupancy-status-ecs-service
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref ConnectDynamoFargateTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !ImportValue SgEcsSecurityGroup
+          Subnets:
+            - !ImportValue EcsPrivateSubnetAZ1
+            - !ImportValue EcsPrivateSubnetAZ2
+      LoadBalancers:
+        - ContainerName: dynamo
+          ContainerPort: 8080
+          TargetGroupArn: !ImportValue TargetGroup
