@@ -22,8 +22,8 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckPath: /
-      Name: ecs-task-m-alb
-      Port: 80
+      Name: ecs-task-alb
+      Port: 8080
       Protocol: HTTP
       TargetType: ip
       HealthCheckProtocol: HTTP
@@ -41,3 +41,9 @@ Resources:
       LoadBalancerArn: !Ref LoadBalancer
       Port: 8080
       Protocol: HTTP
+
+Outputs:
+  TargetGroup:
+    Value: !Ref TargetGroup
+    Export:
+      Name: TargetGroup
