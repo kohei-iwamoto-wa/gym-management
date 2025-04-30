@@ -422,3 +422,7 @@ Outputs:
     Value: !Ref EcsPrivateSubnetAZ2
     Export:
       Name: EcsPrivateSubnetAZ2
+  SgDbSecurityGroup:
+    Value: !Ref SgDbSecurityGroup
+    Export:
+      Name: SgDbSecurityGroup
