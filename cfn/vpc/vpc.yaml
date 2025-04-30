@@ -100,11 +100,23 @@ Resources:
         - Key: Name
           Value: !Sub ${ProjectName}-ecs-private-subnet
 
-  DbPrivateSubnet:
+  DbPrivateSubnetAZ1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref GymManagementVPC
       AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: !Ref PrivateSubnetDbCIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-db-private-subnet
+
+  DbPrivateSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref GymManagementVPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      # CIDR新たに必要
       CidrBlock: !Ref PrivateSubnetDbCIDR
       MapPublicIpOnLaunch: false
       Tags:
@@ -426,3 +438,11 @@ Outputs:
     Value: !Ref SgDbSecurityGroup
     Export:
       Name: SgDbSecurityGroup
+  DbPrivateSubnetAZ1:
+    Value: !Ref DbPrivateSubnetAZ1
+    Export:
+      Name: DbPrivateSubnetAZ1
+  DbPrivateSubnetAZ2:
+    Value: !Ref DbPrivateSubnetAZ2
+    Export:
+      Name: DbPrivateSubnetAZ2
