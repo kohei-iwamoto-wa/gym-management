@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ECS Cluster of GymManagement
+
+Parameters:
+  ProjectName:
+    Description: Project Name
+    Type: String
+
+Resources:
+  GymManagementLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/gym-management
+      RetentionInDays: 7
