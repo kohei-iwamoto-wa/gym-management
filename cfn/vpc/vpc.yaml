@@ -223,18 +223,18 @@ Resources:
         - Key: Name
           Value: !Sub '${ProjectName}-ecs-private-route-table'
 
-  DynamoDbVPCEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    DependsOn: EcsPrivateRouteTable
-    Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.dynamodb'
-      VpcId: !Ref GymManagementVPC
-      VpcEndpointType: Gateway
-      RouteTableIds:
-        - !Ref EcsPrivateRouteTable
-      Tags:
-        - Key: Name
-          Value: !Sub '${ProjectName}-dynamodb-vpc-endpoint'
+  # DynamoDbVPCEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   DependsOn: EcsPrivateRouteTable
+  #   Properties:
+  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.dynamodb'
+  #     VpcId: !Ref GymManagementVPC
+  #     VpcEndpointType: Gateway
+  #     RouteTableIds:
+  #       - !Ref EcsPrivateRouteTable
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Sub '${ProjectName}-dynamodb-vpc-endpoint'
 
   EcsPrivateSubnetAZ1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -350,68 +350,125 @@ Resources:
           CidrIp: 0.0.0.0/0
       SourceSecurityGroupId: !Ref SgEcsSecurityGroup
 
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for Bastion host using Session Manager"
+      VpcId: !Ref GymManagementVPC
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 0.0.0.0/0
+
+  SsmVpcEndpointSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow SSM traffic"
+      VpcId: !Ref GymManagementVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          # SourceSecurityGroupId: !Ref EC2InstanceSecurityGroup
+
   #---------------------------------------------#
   # VPC Endpoint                                #
   #---------------------------------------------#
-  ECRApiEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
-      VpcId: !Ref GymManagementVPC
-      VpcEndpointType: Interface
-      SubnetIds:
-        - !Ref EcsPrivateSubnetAZ1
-        - !Ref EcsPrivateSubnetAZ2
-      PrivateDnsEnabled: true
-      SecurityGroupIds:
-        - !Ref EcrVpcEndpointSg
-      Tags:
-        - Key: Name
-          Value: !Sub '${ProjectName}-ecr-api-endpoint'
+  # ECRApiEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
+  #     VpcId: !Ref GymManagementVPC
+  #     VpcEndpointType: Interface
+  #     SubnetIds:
+  #       - !Ref EcsPrivateSubnetAZ1
+  #       - !Ref EcsPrivateSubnetAZ2
+  #     PrivateDnsEnabled: true
+  #     SecurityGroupIds:
+  #       - !Ref EcrVpcEndpointSg
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Sub '${ProjectName}-ecr-api-endpoint'
 
-  ECRDockerEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
-      VpcId: !Ref GymManagementVPC
-      VpcEndpointType: Interface
-      SubnetIds:
-        - !Ref EcsPrivateSubnetAZ1
-        - !Ref EcsPrivateSubnetAZ2
-      PrivateDnsEnabled: true
-      SecurityGroupIds:
-        - !Ref EcrVpcEndpointSg
-      Tags:
-        - Key: Name
-          Value: !Sub '${ProjectName}-dcr-endpoint'
+  # ECRDockerEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
+  #     VpcId: !Ref GymManagementVPC
+  #     VpcEndpointType: Interface
+  #     SubnetIds:
+  #       - !Ref EcsPrivateSubnetAZ1
+  #       - !Ref EcsPrivateSubnetAZ2
+  #     PrivateDnsEnabled: true
+  #     SecurityGroupIds:
+  #       - !Ref EcrVpcEndpointSg
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Sub '${ProjectName}-dcr-endpoint'
 
-  CloudWatchEndpoint:
+  # CloudWatchEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
+  #     VpcId: !Ref GymManagementVPC
+  #     VpcEndpointType: Interface
+  #     SubnetIds:
+  #       - !Ref EcsPrivateSubnetAZ1
+  #       - !Ref EcsPrivateSubnetAZ2
+  #     PrivateDnsEnabled: true
+  #     SecurityGroupIds:
+  #       - !Ref CloudWatchVpcEndpointSg
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Sub '${ProjectName}-logs-vpc-endpoint'
+
+  # S3VPCEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+  #     VpcId: !Ref GymManagementVPC
+  #     VpcEndpointType: Gateway
+  #     RouteTableIds:
+  #       - !Ref EcsPrivateRouteTable
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Sub '${ProjectName}-s3-vpc-endpoint'
+
+  SsmEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ssm'
       VpcId: !Ref GymManagementVPC
       VpcEndpointType: Interface
       SubnetIds:
         - !Ref EcsPrivateSubnetAZ1
-        - !Ref EcsPrivateSubnetAZ2
       PrivateDnsEnabled: true
       SecurityGroupIds:
-        - !Ref CloudWatchVpcEndpointSg
+        - !Ref SsmVpcEndpointSg
       Tags:
         - Key: Name
           Value: !Sub '${ProjectName}-logs-vpc-endpoint'
 
-  S3VPCEndpoint:
+  SsmMeessagesEndpoint:
     Type: AWS::EC2::VPCEndpoint
     Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ssmmessages'
       VpcId: !Ref GymManagementVPC
-      VpcEndpointType: Gateway
-      RouteTableIds:
-        - !Ref EcsPrivateRouteTable
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref EcsPrivateSubnetAZ1
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref SsmVpcEndpointSg
       Tags:
         - Key: Name
-          Value: !Sub '${ProjectName}-s3-vpc-endpoint'
+          Value: !Sub '${ProjectName}-logs-vpc-endpoint'
 
 Outputs:
   GymManagementVPC:
@@ -454,3 +511,7 @@ Outputs:
     Value: !Ref DbPrivateSubnetAZ2
     Export:
       Name: DbPrivateSubnetAZ2
+  BastionSecurityGroup:
+    Value: !Ref BastionSecurityGroup
+    Export:
+      Name: BastionSecurityGroup

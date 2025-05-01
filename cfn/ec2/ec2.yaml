@@ -17,7 +17,7 @@ Resources:
       InstanceType: t2.small
       Monitoring: true
       SecurityGroupIds: 
-        - !ImportValue SgDbSecurityGroup
+        - !ImportValue BastionSecurityGroup
       SubnetId: !ImportValue DbPrivateSubnetAZ1
       Tags: 
         - Key: Name
