@@ -17,27 +17,32 @@ Parameters:
   AZ1PrivateSubnetEcsCIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
-    Default: 192.168.0.0/23
+    Default: 192.168.0.0/24
 
-  PrivateSubnetDbCIDR:
+  Az1PrivateSubnetDbCIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
-    Default: 192.168.2.0/23
+    Default: 192.168.1.0/24
+
+  Az2PrivateSubnetDbCIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Type: String
+    Default: 192.168.2.0/24
 
   AZ2PrivateSubnetEcsCIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
-    Default: 192.168.4.0/23
+    Default: 192.168.3.0/24
 
   AZ1PublicSubnetEcsCIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
-    Default: 192.168.6.0/23
+    Default: 192.168.4.0/24
 
   AZ2PublicSubnetEcsCIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
-    Default: 192.168.8.0/23
+    Default: 192.168.5.0/24
 
 Resources:
   #---------------------------------------------#
@@ -105,7 +110,7 @@ Resources:
     Properties:
       VpcId: !Ref GymManagementVPC
       AvailabilityZone: !Select [0, !GetAZs '']
-      CidrBlock: !Ref PrivateSubnetDbCIDR
+      CidrBlock: !Ref Az1PrivateSubnetDbCIDR
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
@@ -116,8 +121,7 @@ Resources:
     Properties:
       VpcId: !Ref GymManagementVPC
       AvailabilityZone: !Select [0, !GetAZs '']
-      # CIDR新たに必要
-      CidrBlock: !Ref PrivateSubnetDbCIDR
+      CidrBlock: !Ref Az2PrivateSubnetDbCIDR
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
@@ -286,7 +290,11 @@ Resources:
         - IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306
-          CidrIp: !Ref PrivateSubnetDbCIDR
+          CidrIp: !Ref Az1PrivateSubnetDbCIDR
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: !Ref Az2PrivateSubnetDbCIDR
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
