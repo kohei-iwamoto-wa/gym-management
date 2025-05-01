@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ECS Cluster of GymManagement
+
+Parameters:
+  ProjectName:
+    Description: Project Name
+    Type: String
+
+Resources:
+  BastionInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: !Select [0, !GetAZs '']
+      DisableApiTermination: false
+      IamInstanceProfile: !Ref BastionInstanceProfile
+      ImageId: ami-07b0c09aab6e66ee9
+      InstanceType: t2.small
+      Monitoring: true
+      SecurityGroupIds: 
+        - !ImportValue SgDbSecurityGroup
+      SubnetId: !ImportValue DbPrivateSubnetAZ1
+      Tags: 
+        - Key: Name
+          Value: !Sub '${ProjectName}-bastion-instance'
+
+  BastionInstanceProfile: 
+    Type: "AWS::IAM::InstanceProfile"
+    Properties: 
+      Path: "/"
+      Roles: 
+        - !ImportValue SessionManagerRole

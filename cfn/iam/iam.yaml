@@ -58,6 +58,22 @@ Resources:
                   - 'dynamodb:UpdateItem'
                 Resource: 'arn:aws:dynamodb:*'
 
+  SessionManagerRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
 Outputs:
   EcsTaskExecutionRole:
     Value: !Ref EcsTaskExecutionRole
@@ -67,3 +83,7 @@ Outputs:
     Value: !Ref EcsTaskRole
     Export:
       Name: EcsTaskRole
+  SessionManagerRole:
+    Value: !Ref SessionManagerRole
+    Export:
+      Name: SessionManagerRole
