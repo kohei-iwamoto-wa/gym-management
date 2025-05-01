@@ -16,9 +16,9 @@ Resources:
         - !Select [2, !GetAZs '']
       BackupRetentionPeriod: 7
       DBClusterIdentifier: !Sub '${ProjectName}-database'
-      DBClusterParameterGroupName: 'aurora-mysql8.0'
+      DBClusterParameterGroupName: !Sub '${ProjectName}-aurora-parameter-group'
       # Subnet group 作成する
-      DBSubnetGroupName: 'aurora-subnet-group'
+      DBSubnetGroupName: !Sub '${ProjectName}-aurora-subnet-group'
       Engine: 'aurora-mysql'
       Port: 3306
       MasterUsername: 'admin_user'
@@ -43,27 +43,33 @@ Resources:
         - !ImportValue DbPrivateSubnetAZ1
         - !ImportValue DbPrivateSubnetAZ2
 
+  AuroraClusterParameterGroup:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: Aurora MySQL 8.0 cluster parameter group
+      DBClusterParameterGroupName: !Sub '${ProjectName}-aurora-parameter-group'
+      Family: aurora-mysql8.0
+      Parameters:
+        time_zone: Asia/Tokyo
+        character_set_database: utf8mb4
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-aurora-cluster-param-group'
+
   DbInstance:
     Type: AWS::RDS::DBInstance
     Properties:
       AllowMajorVersionUpgrade: false
       # DBインスタンスの変更を即時反映させるかメンテナンスウィンドウ時に反映させるか
       ApplyImmediately: true
-      AutomaticBackupReplicationRegion: !Sub ${AWS::Region}
       AutoMinorVersionUpgrade: false
       # 自動バックアップの保持期間
       BackupRetentionPeriod: 0
-      DatabaseInsightsMode: standard
       DBClusterIdentifier: !Ref RdsDbCluster
-      DBInstanceClass: db.t3.small
+      DBInstanceClass: db.t3.medium
       DBInstanceIdentifier: !Sub '${ProjectName}-db-instance'
       DBSubnetGroupName: !Sub '${ProjectName}-aurora-subnet-group'
       DeleteAutomatedBackups: true
-      DeletionProtection: false
-      EnablePerformanceInsights: true
       Engine: aurora-mysql
-      PerformanceInsightsRetentionPeriod: 7
       PreferredMaintenanceWindow: 'sun:17:00-sun:17:30'
       PubliclyAccessible: false
-      VPCSecurityGroups:
-        - !ImportValue SgDbSecurityGroup
