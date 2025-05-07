@@ -135,3 +135,8 @@ Resources:
                   - codeconnections:GetConnectionToken
                   - codeconnections:GetConnection
                 Resource: !Ref CodeStarConnectionArn
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:InitiateLayerUpload
+                Resource: "*"
