@@ -9,10 +9,6 @@ Parameters:
     Type: String
     Default: main
     Description: GitHub branch to build
-  GitHubOAuthToken:
-    Type: String
-    NoEcho: true
-    Description: GitHub Classic OAuth token with 'repo' scope
   S3BucketName:
     Type: String
     Description: S3 bucket to upload files
@@ -22,15 +18,15 @@ Parameters:
   CodeStarConnectionArn:
     Type: String
     Description: CodeStar connection ARN to GitHub
-  # S3ArtifactBucketName:
-  #   Type: String
-  #   Description: S3 Artifact Bucket Name
+  S3ArtifactBucketName:
+    Type: String
+    Description: artifact bucket name
 
 Resources:
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${ProjectName}-artifact-bucket"
+      BucketName: !Sub ${S3ArtifactBucketName}
 
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
@@ -45,7 +41,7 @@ Resources:
         Image: aws/codebuild/standard:7.0
       Source:
         Type: CODEPIPELINE
-        BuildSpec: buildspec.yml
+        BuildSpec: ../../buildspec.yml
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -127,20 +123,10 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
-              # - Effect: Allow
-              #   Action:
-              #     - s3:ListBucket
-              #   Resource: !Sub "arn:aws:s3:::${S3BucketName}"
-              # - Effect: Allow
-              #   Action:
-              #     - s3:PutObject
-              #     - s3:DeleteObject
-              #     - s3:GetObject
-              #   Resource: !Sub "arn:aws:s3:::${S3BucketName}/*"
-              # - Effect: Allow
-              #   Action:
-              #     - s3:GetObject
-              #   Resource: !Sub "arn:aws:s3:::${S3ArtifactBucketName}/*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${S3ArtifactBucketName}/*"
               - Effect: Allow
                 Action: logs:*
                 Resource: "*"
@@ -148,4 +134,4 @@ Resources:
                 Action:
                   - codeconnections:GetConnectionToken
                   - codeconnections:GetConnection
-                Resource: !Sub "arn:aws:codeconnections:${AWS::Region}:${AWS::AccountId}:connection/f84533a0-b779-422d-8ab0-a87fc9369d4f"
+                Resource: !Ref CodeStarConnectionArn
