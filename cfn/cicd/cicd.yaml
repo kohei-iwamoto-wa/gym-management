@@ -139,4 +139,5 @@ Resources:
                 Action:
                   - ecr:GetAuthorizationToken
                   - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
                 Resource: "*"
