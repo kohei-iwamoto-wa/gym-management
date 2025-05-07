@@ -380,65 +380,65 @@ Resources:
   #---------------------------------------------#
   # VPC Endpoint                                #
   #---------------------------------------------#
-  # ECRApiEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
-  #     VpcId: !Ref GymManagementVPC
-  #     VpcEndpointType: Interface
-  #     SubnetIds:
-  #       - !Ref EcsPrivateSubnetAZ1
-  #       - !Ref EcsPrivateSubnetAZ2
-  #     PrivateDnsEnabled: true
-  #     SecurityGroupIds:
-  #       - !Ref EcrVpcEndpointSg
-  #     Tags:
-  #       - Key: Name
-  #         Value: !Sub '${ProjectName}-ecr-api-endpoint'
+  ECRApiEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
+      VpcId: !Ref GymManagementVPC
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref EcsPrivateSubnetAZ1
+        - !Ref EcsPrivateSubnetAZ2
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref EcrVpcEndpointSg
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-ecr-api-endpoint'
 
-  # ECRDockerEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
-  #     VpcId: !Ref GymManagementVPC
-  #     VpcEndpointType: Interface
-  #     SubnetIds:
-  #       - !Ref EcsPrivateSubnetAZ1
-  #       - !Ref EcsPrivateSubnetAZ2
-  #     PrivateDnsEnabled: true
-  #     SecurityGroupIds:
-  #       - !Ref EcrVpcEndpointSg
-  #     Tags:
-  #       - Key: Name
-  #         Value: !Sub '${ProjectName}-dcr-endpoint'
+  ECRDockerEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
+      VpcId: !Ref GymManagementVPC
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref EcsPrivateSubnetAZ1
+        - !Ref EcsPrivateSubnetAZ2
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref EcrVpcEndpointSg
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-dcr-endpoint'
 
-  # CloudWatchEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
-  #     VpcId: !Ref GymManagementVPC
-  #     VpcEndpointType: Interface
-  #     SubnetIds:
-  #       - !Ref EcsPrivateSubnetAZ1
-  #       - !Ref EcsPrivateSubnetAZ2
-  #     PrivateDnsEnabled: true
-  #     SecurityGroupIds:
-  #       - !Ref CloudWatchVpcEndpointSg
-  #     Tags:
-  #       - Key: Name
-  #         Value: !Sub '${ProjectName}-logs-vpc-endpoint'
+  CloudWatchEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
+      VpcId: !Ref GymManagementVPC
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref EcsPrivateSubnetAZ1
+        - !Ref EcsPrivateSubnetAZ2
+      PrivateDnsEnabled: true
+      SecurityGroupIds:
+        - !Ref CloudWatchVpcEndpointSg
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-logs-vpc-endpoint'
 
-  # S3VPCEndpoint:
-  #   Type: AWS::EC2::VPCEndpoint
-  #   Properties:
-  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
-  #     VpcId: !Ref GymManagementVPC
-  #     VpcEndpointType: Gateway
-  #     RouteTableIds:
-  #       - !Ref EcsPrivateRouteTable
-  #     Tags:
-  #       - Key: Name
-  #         Value: !Sub '${ProjectName}-s3-vpc-endpoint'
+  S3VPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      VpcId: !Ref GymManagementVPC
+      VpcEndpointType: Gateway
+      RouteTableIds:
+        - !Ref EcsPrivateRouteTable
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-s3-vpc-endpoint'
 
   SsmEndpoint:
     Type: AWS::EC2::VPCEndpoint
