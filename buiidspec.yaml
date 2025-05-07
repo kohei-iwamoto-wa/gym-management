@@ -1,0 +1,47 @@
+version: 0.2
+
+run-as: linux-build-user
+        
+phases:
+  install:
+    run-as: linux-build-user
+    on-failure: ABORT
+    runtime-versions:
+      runtime: 
+        python: 3.12
+  pre_build:
+    run-as: linux-build-user
+    on-failure: ABORT
+    commands:
+      - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 730335414536.dkr.ecr.us-west-2.amazonaws.com
+  build:
+    run-as: linux-build-user
+    on-failure: ABORT
+    commands:
+      - docker build -t test-dynamodb-connection .
+      - docker tag test-dynamodb-connection:latest 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
+      - docker push 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
+# artifacts:
+#   files:
+#     - location
+#     - location
+#   name: gym-management-artifact
+#   discard-paths: no | yes
+#   base-directory: location
+#   exclude-paths: excluded paths
+#   enable-symlinks: no | yes
+#   s3-prefix: prefix
+#   secondary-artifacts:
+#     artifactIdentifier:
+#       files:
+#         - location
+#         - location
+#       name: secondary-artifact-name
+#       discard-paths: no | yes
+#       base-directory: location
+#     artifactIdentifier:
+#       files:
+#         - location
+#         - location
+#       discard-paths: no | yes
+#       base-directory: location

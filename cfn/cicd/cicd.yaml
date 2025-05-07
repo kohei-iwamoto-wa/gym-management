@@ -1,0 +1,151 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CodeBuild project using GitHub OAUTH to deploy prebuilt Hugo site to S3
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository (e.g. username/repo)
+  GitHubBranch:
+    Type: String
+    Default: main
+    Description: GitHub branch to build
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
+    Description: GitHub Classic OAuth token with 'repo' scope
+  S3BucketName:
+    Type: String
+    Description: S3 bucket to upload files
+  ProjectName:
+    Type: String
+    Description: CodeBuild Project Name
+  CodeStarConnectionArn:
+    Type: String
+    Description: CodeStar connection ARN to GitHub
+  # S3ArtifactBucketName:
+  #   Type: String
+  #   Description: S3 Artifact Bucket Name
+
+Resources:
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectName}-artifact-bucket"
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub '${ProjectName}-gym-management-deploy'
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec.yml
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Sub "${ProjectName}-pipeline"
+      RoleArn: !GetAtt PipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactBucket
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: GitHub_Source
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: CodeStarSourceConnection
+                Version: 1
+              OutputArtifacts:
+                - Name: SourceOutput
+              Configuration:
+                ConnectionArn: !Ref CodeStarConnectionArn
+                FullRepositoryId: !Ref GitHubRepo
+                BranchName: main
+                DetectChanges: true
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: CodeBuild
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              InputArtifacts:
+                - Name: SourceOutput
+              OutputArtifacts:
+                - Name: BuildOutput
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              RunOrder: 1
+
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodePipelineCustomPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:*
+                  - s3:*
+                  - codestar-connections:UseConnection
+                Resource: "*"
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    DependsOn: ArtifactBucket
+    Properties:
+      RoleName: !Sub "CodeBuildServiceRole-${AWS::StackName}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodeBuildS3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              # - Effect: Allow
+              #   Action:
+              #     - s3:ListBucket
+              #   Resource: !Sub "arn:aws:s3:::${S3BucketName}"
+              # - Effect: Allow
+              #   Action:
+              #     - s3:PutObject
+              #     - s3:DeleteObject
+              #     - s3:GetObject
+              #   Resource: !Sub "arn:aws:s3:::${S3BucketName}/*"
+              # - Effect: Allow
+              #   Action:
+              #     - s3:GetObject
+              #   Resource: !Sub "arn:aws:s3:::${S3ArtifactBucketName}/*"
+              - Effect: Allow
+                Action: logs:*
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - codeconnections:GetConnectionToken
+                  - codeconnections:GetConnection
+                Resource: !Sub "arn:aws:codeconnections:${AWS::Region}:${AWS::AccountId}:connection/f84533a0-b779-422d-8ab0-a87fc9369d4f"
