@@ -57,6 +57,10 @@ Resources:
                   - 'dynamodb:Scan'
                   - 'dynamodb:UpdateItem'
                 Resource: 'arn:aws:dynamodb:*'
+              - Effect: Allow
+                Action:
+                  - 'ssm:GetParameter'
+                Resource: '*'
 
   SessionManagerRole:
     Type: 'AWS::IAM::Role'
