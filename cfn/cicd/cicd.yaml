@@ -41,7 +41,7 @@ Resources:
         Image: aws/codebuild/standard:7.0
       Source:
         Type: CODEPIPELINE
-        BuildSpec: ../../buildspec.yml
+        BuildSpec: buildspec.yml
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
