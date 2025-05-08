@@ -52,6 +52,8 @@ Resources:
       TaskDefinition: !Ref ConnectDynamoFargateTaskDefinition
       DesiredCount: 1
       LaunchType: FARGATE
+      DeploymentController:
+        Type: CODE_DEPLOY
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: DISABLED
@@ -64,3 +66,14 @@ Resources:
         - ContainerName: dynamo
           ContainerPort: 8080
           TargetGroupArn: !ImportValue TargetGroup
+
+Outputs:
+  ECSCluster:
+    Value: !Ref ECSCluster
+    Export:
+      Name: ECSCluster
+
+  OccupancyStatusECSService:
+    Value: occupancy-status-ecs-service
+    Export:
+      Name: OccupancyStatusECSService

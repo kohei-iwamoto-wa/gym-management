@@ -43,8 +43,45 @@ Resources:
         Type: CODEPIPELINE
         BuildSpec: buildspec.yml
 
+  CodeDeployProject:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: !Sub "${ProjectName}"
+      ComputePlatform: ECS
+
+  DeploymentGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref CodeDeployProject
+      DeploymentGroupName: DeploymentGroup
+      DeploymentConfigName: CodeDeployDefault.ECSAllAtOnce
+      ServiceRoleArn: !GetAtt CodeDeployServiceRole.Arn
+      ECSServices:
+        - ClusterName: !ImportValue ECSCluster
+          ServiceName: !ImportValue OccupancyStatusECSService
+      BlueGreenDeploymentConfiguration:
+        TerminateBlueInstancesOnDeploymentSuccess:
+          Action: TERMINATE
+          TerminationWaitTimeInMinutes: 5
+        DeploymentReadyOption:
+          ActionOnTimeout: CONTINUE_DEPLOYMENT
+          WaitTimeInMinutes: 0
+        GreenFleetProvisioningOption:
+          Action: DISCOVER_EXISTING
+      DeploymentStyle:
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+        DeploymentType: BLUE_GREEN
+      LoadBalancerInfo:
+        TargetGroupInfoList:
+          - Name: !ImportValue TargetGroup
+      AutoRollbackConfiguration:
+        Enabled: true
+        Events:
+          - DEPLOYMENT_FAILURE
+
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
+    DependsOn: CodeDeployServiceRole
     Properties:
       Name: !Sub "${ProjectName}-pipeline"
       RoleArn: !GetAtt PipelineRole.Arn
@@ -83,7 +120,35 @@ Resources:
               Configuration:
                 ProjectName: !Ref CodeBuildProject
               RunOrder: 1
-
+        - Name: Deploy
+          Actions:
+            - Name: CodeDeploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CodeDeploy
+                Version: 1
+              InputArtifacts:
+                - Name: BuildOutput
+              OutputArtifacts:
+                - Name: DeployOutput
+              Configuration:
+                ApplicationName: !Ref CodeDeployProject
+                DeploymentGroupName: DeploymentGroup 
+              RunOrder: 1
+      Triggers:
+        - ProviderType: CodeStarSourceConnection
+          GitConfiguration:
+            SourceActionName: GitHub_Source
+            Push:
+              - Branches:
+                  Includes:
+                    - main
+                FilePaths:
+                  Excludes:
+                    - '**/README.md'
+                    - 'cfn/**'
+                
   PipelineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -104,6 +169,9 @@ Resources:
                   - codebuild:*
                   - s3:*
                   - codestar-connections:UseConnection
+                  - codedeploy:*
+                  - ecs:*
+                  - iam:PassRole
                 Resource: "*"
 
   CodeBuildServiceRole:
@@ -146,4 +214,33 @@ Resources:
                   - ssm:GetParameter
                   - ssm:GetParameters
                   - ssm:GetParametersByPath
+                Resource: "*"
+
+  CodeDeployServiceRole:
+    Type: AWS::IAM::Role
+    DependsOn: ArtifactBucket
+    Properties:
+      RoleName: !Sub "CodeDeployServiceRole-${AWS::StackName}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codedeploy.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CodeBuildS3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecs:DescribeServices
+                  - ecs:UpdateService
+                  - ecs:RegisterTaskDefinition
+                  - iam:PassRole
                 Resource: "*"
