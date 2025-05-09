@@ -28,6 +28,21 @@ Resources:
     Properties:
       BucketName: !Sub ${S3ArtifactBucketName}
 
+  ArtifactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ArtifactBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt CodeDeployServiceRole.Arn
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+            Resource: !Sub "arn:aws:s3:::${S3ArtifactBucketName}/*"
+
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -199,8 +214,6 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:GetObject
-                  - s3:GetObjectVersion
-                  - s3:PutObject
                 Resource: !Sub "arn:aws:s3:::${S3ArtifactBucketName}/*"
               - Effect: Allow
                 Action: logs:*
@@ -221,6 +234,9 @@ Resources:
                   - ssm:GetParameter
                   - ssm:GetParameters
                   - ssm:GetParametersByPath
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
                 Resource: "*"
 
   CodeDeployServiceRole:
@@ -250,4 +266,12 @@ Resources:
                   - ecs:UpdateService
                   - ecs:RegisterTaskDefinition
                   - iam:PassRole
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                  - elasticloadbalancing:DescribeTargetGroups
+                  - elasticloadbalancing:DescribeListeners
+                  - elasticloadbalancing:ModifyListener
+                  - elasticloadbalancing:DescribeRules
+                  - elasticloadbalancing:ModifyRule
                 Resource: "*"
