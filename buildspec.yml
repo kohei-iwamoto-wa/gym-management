@@ -21,27 +21,6 @@ phases:
       - docker build -t test-dynamodb-connection .
       - docker tag test-dynamodb-connection:latest 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
       - docker push 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
-# artifacts:
-#   files:
-#     - location
-#     - location
-#   name: gym-management-artifact
-#   discard-paths: no | yes
-#   base-directory: location
-#   exclude-paths: excluded paths
-#   enable-symlinks: no | yes
-#   s3-prefix: prefix
-#   secondary-artifacts:
-#     artifactIdentifier:
-#       files:
-#         - location
-#         - location
-#       name: secondary-artifact-name
-#       discard-paths: no | yes
-#       base-directory: location
-#     artifactIdentifier:
-#       files:
-#         - location
-#         - location
-#       discard-paths: no | yes
-#       base-directory: location
+artifacts:
+  files:
+    - imagedefinitions.json
