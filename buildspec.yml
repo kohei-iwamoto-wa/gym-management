@@ -21,6 +21,7 @@ phases:
       - docker build -t test-dynamodb-connection .
       - docker tag test-dynamodb-connection:latest 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
       - docker push 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
+      - echo '[{"name":"docker","imageUri":"730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest"}]' > imagedefinitions.json
 artifacts:
   files:
     - imagedefinitions.json
