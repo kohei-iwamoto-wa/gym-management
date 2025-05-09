@@ -375,7 +375,6 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
-          # SourceSecurityGroupId: !Ref EC2InstanceSecurityGroup
 
   #---------------------------------------------#
   # VPC Endpoint                                #
@@ -440,35 +439,35 @@ Resources:
         - Key: Name
           Value: !Sub '${ProjectName}-s3-vpc-endpoint'
 
-  SsmEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ssm'
-      VpcId: !Ref GymManagementVPC
-      VpcEndpointType: Interface
-      SubnetIds:
-        - !Ref EcsPrivateSubnetAZ1
-      PrivateDnsEnabled: true
-      SecurityGroupIds:
-        - !Ref SsmVpcEndpointSg
-      Tags:
-        - Key: Name
-          Value: !Sub '${ProjectName}-logs-vpc-endpoint'
+  # SsmEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ssm'
+  #     VpcId: !Ref GymManagementVPC
+  #     VpcEndpointType: Interface
+  #     SubnetIds:
+  #       - !Ref EcsPrivateSubnetAZ1
+  #     PrivateDnsEnabled: true
+  #     SecurityGroupIds:
+  #       - !Ref SsmVpcEndpointSg
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Sub '${ProjectName}-logs-vpc-endpoint'
 
-  SsmMeessagesEndpoint:
-    Type: AWS::EC2::VPCEndpoint
-    Properties:
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ssmmessages'
-      VpcId: !Ref GymManagementVPC
-      VpcEndpointType: Interface
-      SubnetIds:
-        - !Ref EcsPrivateSubnetAZ1
-      PrivateDnsEnabled: true
-      SecurityGroupIds:
-        - !Ref SsmVpcEndpointSg
-      Tags:
-        - Key: Name
-          Value: !Sub '${ProjectName}-logs-vpc-endpoint'
+  # SsmMeessagesEndpoint:
+  #   Type: AWS::EC2::VPCEndpoint
+  #   Properties:
+  #     ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ssmmessages'
+  #     VpcId: !Ref GymManagementVPC
+  #     VpcEndpointType: Interface
+  #     SubnetIds:
+  #       - !Ref EcsPrivateSubnetAZ1
+  #     PrivateDnsEnabled: true
+  #     SecurityGroupIds:
+  #       - !Ref SsmVpcEndpointSg
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Sub '${ProjectName}-logs-vpc-endpoint'
 
 Outputs:
   GymManagementVPC:
