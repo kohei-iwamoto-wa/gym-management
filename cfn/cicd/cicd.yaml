@@ -66,14 +66,20 @@ Resources:
         DeploymentReadyOption:
           ActionOnTimeout: CONTINUE_DEPLOYMENT
           WaitTimeInMinutes: 0
-        GreenFleetProvisioningOption:
-          Action: DISCOVER_EXISTING
       DeploymentStyle:
         DeploymentOption: WITH_TRAFFIC_CONTROL
         DeploymentType: BLUE_GREEN
       LoadBalancerInfo:
-        TargetGroupInfoList:
-          - Name: !ImportValue TargetGroup
+        TargetGroupPairInfoList:
+          - TargetGroups:
+              - Name: !ImportValue TargetGroup
+              - Name: !ImportValue GreenTargetGroup
+            ProdTrafficRoute:
+              ListenerArns:
+                - !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/gym-management-alb/3aeb2676d2150fee/4b2b38d7daf24f21"
+            TestTrafficRoute:
+              ListenerArns:
+                - !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/gym-management-alb/3aeb2676d2150fee/605fef7bb51f661d"      
       AutoRollbackConfiguration:
         Enabled: true
         Events:
@@ -130,8 +136,7 @@ Resources:
                 Version: 1
               InputArtifacts:
                 - Name: BuildOutput
-              OutputArtifacts:
-                - Name: DeployOutput
+              OutputArtifacts: []
               Configuration:
                 ApplicationName: !Ref CodeDeployProject
                 DeploymentGroupName: DeploymentGroup 

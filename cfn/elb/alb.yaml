@@ -42,8 +42,36 @@ Resources:
       Port: 8080
       Protocol: HTTP
 
+  GreenTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckPath: /
+      Name: green-ecs-task-alb
+      Port: 8080
+      Protocol: HTTP
+      TargetType: ip
+      HealthCheckProtocol: HTTP
+      VpcId: !ImportValue GymManagementVPC
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: '300'
+
+  GreenListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !GetAtt TargetGroup.TargetGroupArn
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 8000
+      Protocol: HTTP
+
 Outputs:
   TargetGroup:
     Value: !Ref TargetGroup
     Export:
       Name: TargetGroup
+  GreenTargetGroup:
+    Value: !Ref GreenTargetGroup
+    Export:
+      Name: GreenTargetGroup
