@@ -248,4 +248,7 @@ Resources:
                   - ecs:UpdateService
                   - ecs:RegisterTaskDefinition
                   - iam:PassRole
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
                 Resource: "*"
