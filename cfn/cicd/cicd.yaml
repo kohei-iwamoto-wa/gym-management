@@ -199,6 +199,8 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
                 Resource: !Sub "arn:aws:s3:::${S3ArtifactBucketName}/*"
               - Effect: Allow
                 Action: logs:*
@@ -248,7 +250,4 @@ Resources:
                   - ecs:UpdateService
                   - ecs:RegisterTaskDefinition
                   - iam:PassRole
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                  - s3:PutObject
                 Resource: "*"
