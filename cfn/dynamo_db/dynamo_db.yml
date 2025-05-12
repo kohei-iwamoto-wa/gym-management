@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CodeBuild project using GitHub OAUTH to deploy prebuilt Hugo site to S3
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository (e.g. username/repo)
+  GitHubBranch:
+    Type: String
+    Default: main
+    Description: GitHub branch to build
+  S3BucketName:
+    Type: String
+    Description: S3 bucket to upload files
+  ProjectName:
+    Type: String
+    Description: CodeBuild Project Name
+  CodeStarConnectionArn:
+    Type: String
+    Description: CodeStar connection ARN to GitHub
+  S3ArtifactBucketName:
+    Type: String
+    Description: artifact bucket name
+
+Resources:
+  ArtifactBucket:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions: 
+        - AttributeDefinition
+      BillingMode: String
+      ContributorInsightsSpecification: 
+        ContributorInsightsSpecification
+      DeletionProtectionEnabled: Boolean
+      GlobalSecondaryIndexes: 
+        - GlobalSecondaryIndex
+      ImportSourceSpecification: 
+        ImportSourceSpecification
+      KeySchema: 
+        - KeySchema
+      KinesisStreamSpecification: 
+        KinesisStreamSpecification
+      LocalSecondaryIndexes: 
+        - LocalSecondaryIndex
+      OnDemandThroughput: 
+        OnDemandThroughput
+      PointInTimeRecoverySpecification: 
+        PointInTimeRecoverySpecification
+      ProvisionedThroughput: 
+        ProvisionedThroughput
+      ResourcePolicy: 
+        ResourcePolicy
+      SSESpecification: 
+        SSESpecification
+      StreamSpecification: 
+        StreamSpecification
+      TableClass: String
+      TableName: String
+      Tags: 
+        - Tag
+      TimeToLiveSpecification: 
+        TimeToLiveSpecification
+      WarmThroughput: 
+        WarmThroughput
