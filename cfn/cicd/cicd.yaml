@@ -267,6 +267,7 @@ Resources:
                   - ecs:RegisterTaskDefinition
                   - ecs:CreateTaskSet
                   - ecs:UpdateServicePrimaryTaskSet
+                  - ecs:DeleteTaskSet
                   - iam:PassRole
                   - s3:GetObject
                   - s3:GetObjectVersion
