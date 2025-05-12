@@ -265,6 +265,8 @@ Resources:
                   - ecs:DescribeServices
                   - ecs:UpdateService
                   - ecs:RegisterTaskDefinition
+                  - ecs:CreateTaskSet
+                  - ecs:UpdateServicePrimaryTaskSet
                   - iam:PassRole
                   - s3:GetObject
                   - s3:GetObjectVersion
