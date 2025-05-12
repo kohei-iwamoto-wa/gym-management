@@ -9,11 +9,11 @@ Resources:
           ContainerName: "dynamo"
           ContainerPort: 8080
         PlatformVersion: "latest"
-        NetworkConfiguration:
-          AwsvpcConfiguration:
-            Subnets:
-              - !ImportValue EcsPrivateSubnetAZ1
-              - !ImportValue EcsPrivateSubnetAZ2
-            SecurityGroups: 
-              - !ImportValue SgEcsSecurityGroup
-            AssignPublicIp: "DISABLED"
+        # NetworkConfiguration:
+        #   AwsvpcConfiguration:
+        #     Subnets:
+        #       - !ImportValue EcsPrivateSubnetAZ1
+        #       - !ImportValue EcsPrivateSubnetAZ2
+        #     SecurityGroups: 
+        #       - !ImportValue SgEcsSecurityGroup
+        #     AssignPublicIp: "DISABLED"
