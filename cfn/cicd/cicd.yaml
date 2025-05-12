@@ -87,14 +87,14 @@ Resources:
       LoadBalancerInfo:
         TargetGroupPairInfoList:
           - TargetGroups:
-              - Name: !ImportValue TargetGroup
-              - Name: !ImportValue GreenTargetGroup
+              - Name: !ImportValue TargetGroupName
+              - Name: !ImportValue GreenTargetGroupName
             ProdTrafficRoute:
               ListenerArns:
-                - !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/gym-management-alb/3aeb2676d2150fee/4b2b38d7daf24f21"
+                - !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/gym-management-alb/f8293006d7b2a02c/105a39d57b7e5023"
             TestTrafficRoute:
               ListenerArns:
-                - !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/gym-management-alb/3aeb2676d2150fee/605fef7bb51f661d"      
+                - !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/gym-management-alb/c4f3743e65913785/dad5a50732515357"      
       AutoRollbackConfiguration:
         Enabled: true
         Events:
