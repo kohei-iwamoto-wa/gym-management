@@ -22,7 +22,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckPath: /
-      Name: a
+      Name: alb-blue-target
       Port: 8080
       Protocol: HTTP
       TargetType: ip
@@ -46,7 +46,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       HealthCheckPath: /
-      Name: b
+      Name: alb-green-target
       Port: 8080
       Protocol: HTTP
       TargetType: ip
@@ -68,10 +68,14 @@ Resources:
 
 Outputs:
   TargetGroup:
-    Value: !GetAtt TargetGroup.TargetGroupName
+    Value: !GetAtt TargetGroup.TargetGroupArn  
     Export:
       Name: TargetGroup
-  GreenTargetGroup:
+  TargetGroupName:
+    Value: !GetAtt TargetGroup.TargetGroupName
+    Export:
+      Name: TargetGroupName
+  GreenTargetGroupName:
     Value: !GetAtt GreenTargetGroup.TargetGroupName
     Export:
-      Name: GreenTargetGroup
+      Name: GreenTargetGroupName
