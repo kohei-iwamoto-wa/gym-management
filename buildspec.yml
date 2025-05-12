@@ -22,6 +22,11 @@ phases:
       - docker tag test-dynamodb-connection:latest 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
       - docker push 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
       - echo '[{"name":"dynamo","imageUri":"730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest"}]' > imagedefinitions.json
+      - |
+        echo '==== Debug appspec.yml ===='
+        cat appspec.yml
+        echo '==== Debug imagedefinitions.json ===='
+        cat imagedefinitions.json
 artifacts:
   files:
     - imagedefinitions.json
