@@ -91,10 +91,10 @@ Resources:
               - Name: !ImportValue GreenTargetGroupName
             ProdTrafficRoute:
               ListenerArns:
-                - !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/gym-management-alb/f8293006d7b2a02c/105a39d57b7e5023"
+                - !ImportValue ListenerArn
             TestTrafficRoute:
               ListenerArns:
-                - !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:listener/app/gym-management-alb/c4f3743e65913785/dad5a50732515357"      
+                - !ImportValue GreenListenerArn      
       AutoRollbackConfiguration:
         Enabled: true
         Events:

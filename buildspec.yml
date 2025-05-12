@@ -13,16 +13,16 @@ phases:
   pre_build:
     on-failure: ABORT
     commands:
-    - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 730335414536.dkr.ecr.us-west-2.amazonaws.com
-    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 730335414536.dkr.ecr.us-west-2.amazonaws.com
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   build:
     on-failure: ABORT
     commands:
       - docker build -t test-dynamodb-connection .
       - docker tag test-dynamodb-connection:latest 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
       - docker push 730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest
-      - echo '[{"name":"docker","imageUri":"730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest"}]' > imagedefinitions.json
+      - echo '[{"name":"dynamo","imageUri":"730335414536.dkr.ecr.us-west-2.amazonaws.com/test-dynamodb-connection:latest"}]' > imagedefinitions.json
+
 artifacts:
   files:
     - imagedefinitions.json
-    - appspec.yml

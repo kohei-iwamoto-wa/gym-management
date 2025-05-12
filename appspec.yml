@@ -3,7 +3,7 @@ Resources:
   - TargetService:
       Type: AWS::ECS::Service
       Properties:
-        TaskDefinition: "arn:aws:ecs:us-west-2:730335414536:task-definition/gym-management:latest"
+        TaskDefinition: PLACEHOLDER
         LoadBalancerInfo:
           ContainerName: "dynamo"
-          ContainerPort: "8080"
+          ContainerPort: 8080

@@ -79,3 +79,11 @@ Outputs:
     Value: !GetAtt GreenTargetGroup.TargetGroupName
     Export:
       Name: GreenTargetGroupName
+  ListenerArn:
+    Value: !Ref Listener
+    Export:
+      Name: ListenerArn
+  GreenListenerArn:
+    Value: !Ref GreenListener
+    Export:
+      Name: GreenListenerArn
