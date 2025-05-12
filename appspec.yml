@@ -8,7 +8,7 @@ Resources:
         LoadBalancerInfo:
           ContainerName: "dynamo"
           ContainerPort: 8080
-        PlatformVersion: "latest"
+        # PlatformVersion: "latest"
         # NetworkConfiguration:
         #   AwsvpcConfiguration:
         #     Subnets:
