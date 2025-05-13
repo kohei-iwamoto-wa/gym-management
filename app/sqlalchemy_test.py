@@ -6,8 +6,6 @@ load_dotenv()
 
 db_password = os.getenv("DB_PASSWORD")
 
-print("db_password", db_password)
-
 engine = create_engine(f'mysql+pymysql://addmin_user:{db_password}@local-aurora-mysql:3306/gym_db')
 
 metadata = MetaData()
