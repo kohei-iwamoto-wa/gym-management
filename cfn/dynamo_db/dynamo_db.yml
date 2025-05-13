@@ -2,63 +2,110 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: CodeBuild project using GitHub OAUTH to deploy prebuilt Hugo site to S3
 
 Parameters:
-  GitHubRepo:
-    Type: String
-    Description: GitHub repository (e.g. username/repo)
-  GitHubBranch:
-    Type: String
-    Default: main
-    Description: GitHub branch to build
-  S3BucketName:
-    Type: String
-    Description: S3 bucket to upload files
   ProjectName:
     Type: String
     Description: CodeBuild Project Name
-  CodeStarConnectionArn:
-    Type: String
-    Description: CodeStar connection ARN to GitHub
-  S3ArtifactBucketName:
-    Type: String
-    Description: artifact bucket name
 
 Resources:
-  ArtifactBucket:
+  OccupancyTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      AttributeDefinitions: 
-        - AttributeDefinition
-      BillingMode: String
-      ContributorInsightsSpecification: 
-        ContributorInsightsSpecification
-      DeletionProtectionEnabled: Boolean
+      AttributeDefinitions:
+        - 
+          AttributeName: "occupancy_id"
+          AttributeType: "N"
+        - 
+          AttributeName: "gym_id"
+          AttributeType: "N"
+        -
+          AttributeName: "entry_time"
+          AttributeType: "S"
+        -
+          AttributeName: "exit_time"
+          AttributeType: "S"
+      BillingMode: PAY_PER_REQUEST
+      ContributorInsightsSpecification:
+        Enabled: true
+      DeletionProtectionEnabled: false
       GlobalSecondaryIndexes: 
-        - GlobalSecondaryIndex
-      ImportSourceSpecification: 
-        ImportSourceSpecification
+        -
+          IndexName: "gsi_entry_time"
+          KeySchema:
+            -
+              AttributeName: "entry_time"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+        -
+          IndexName: "gsi_exit_time"
+          KeySchema:
+            -
+              AttributeName: "exit_time"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
       KeySchema: 
-        - KeySchema
-      KinesisStreamSpecification: 
-        KinesisStreamSpecification
-      LocalSecondaryIndexes: 
-        - LocalSecondaryIndex
-      OnDemandThroughput: 
-        OnDemandThroughput
+        - 
+          AttributeName: "occupancy_id"
+          KeyType: "HASH"
+        - 
+          AttributeName: "gym_id"
+          KeyType: "RANGE"
       PointInTimeRecoverySpecification: 
-        PointInTimeRecoverySpecification
-      ProvisionedThroughput: 
-        ProvisionedThroughput
-      ResourcePolicy: 
-        ResourcePolicy
-      SSESpecification: 
-        SSESpecification
-      StreamSpecification: 
-        StreamSpecification
-      TableClass: String
-      TableName: String
-      Tags: 
-        - Tag
+        PointInTimeRecoveryEnabled: true
+        RecoveryPeriodInDays: 3
+      TableClass: STANDARD 
+      TableName: !Sub "${ProjectName}-occupancy-table"
       TimeToLiveSpecification: 
-        TimeToLiveSpecification
-      WarmThroughput: 
-        WarmThroughput
+        AttributeName: entry_time
+        Enabled: true
+
+  OccupancyHistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - 
+          AttributeName: "history_id"
+          AttributeType: "N"
+        - 
+          AttributeName: "gym_id#user_id"
+          AttributeType: "S"
+        -
+          AttributeName: "entry_time"
+          AttributeType: "S"
+        -
+          AttributeName: "exit_time"
+          AttributeType: "S"
+      BillingMode: PAY_PER_REQUEST
+      ContributorInsightsSpecification:
+        Enabled: true
+      DeletionProtectionEnabled: false
+      GlobalSecondaryIndexes: 
+        -
+          IndexName: "gsi_entry_time"
+          KeySchema:
+            -
+              AttributeName: "entry_time"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+        -
+          IndexName: "gsi_exit_time"
+          KeySchema:
+            -
+              AttributeName: "exit_time"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+      KeySchema: 
+        - 
+          AttributeName: "history_id"
+          KeyType: "HASH"
+        - 
+          AttributeName: "gym_id#user_id"
+          KeyType: "RANGE"
+      PointInTimeRecoverySpecification: 
+        PointInTimeRecoveryEnabled: true
+        RecoveryPeriodInDays: 3
+      TableClass: STANDARD 
+      TableName: !Sub "${ProjectName}-occupancy-history-table"
