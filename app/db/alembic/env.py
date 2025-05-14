@@ -1,0 +1,24 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+from alembic import context
+from sqlalchemy import engine_from_config, pool
+from logging.config import fileConfig
+
+# Alembic Config オブジェクト取得
+config = context.config
+
+# alembic.ini にあるロギング設定を反映
+fileConfig(config.config_file_name)
+
+# 環境変数から DB URL を取得して、alembic.ini の設定を上書き
+config.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
+
+# モデルの Base を import
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from models import Base
+
+target_metadata = Base.metadata

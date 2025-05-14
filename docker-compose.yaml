@@ -16,7 +16,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: gym_db
       MYSQL_USER: app_user
-      # MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -27,16 +27,16 @@ services:
       - dynamodb-local
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: app/dynamo_app/Dockerfile
     container_name: app-node-test
     ports:
     - "8080:8080"
     volumes:
-      - ./app:/code/app
+      - ./app/dynamo_app:/app/dynamo_app
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      REGION: 'eu-west-1'
+      REGION: 'us-west-2'
 networks:
   default:
     name: my-custom-network
