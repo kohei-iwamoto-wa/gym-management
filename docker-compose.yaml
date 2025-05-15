@@ -22,6 +22,16 @@ services:
     volumes:
       - ./db_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
+  db_migration:
+    depends_on:
+      - mysql
+    build:
+      context: .
+      dockerfile: app/dynamo_app/Dockerfile
+    container_name: db-migration
+    ports:
+      - "5555:5555"
+    # command: uvicorn app.main:app --host 0.0.0.0 --port 5555
   app-node:
     depends_on:
       - dynamodb-local
@@ -37,6 +47,7 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       REGION: 'us-west-2'
+    # command: uvicorn app.main:app --host 0.0.0.0 --port 8080
 networks:
   default:
     name: my-custom-network

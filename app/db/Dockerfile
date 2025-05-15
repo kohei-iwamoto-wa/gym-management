@@ -8,12 +8,13 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y unzip curl && \
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && ./aws/install && rm -rf awscliv2.zip ./aws
-
 # Python依存ライブラリのインストール
 COPY ./requirements.txt ./db/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r ./db/requirements.txt
 # アプリケーションをコピー
-COPY . /app/db
-# ls で確認
+COPY ./app /app/db
+# lsで確認
 RUN ls -la /app/db
+RUN chmod +x /app/db/entrypoint.sh
+RUN sed -i 's/\r$//' /app/db/entrypoint.sh
 CMD ["/app/db/entrypoint.sh"]

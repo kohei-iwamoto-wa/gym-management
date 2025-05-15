@@ -13,7 +13,7 @@ config = context.config
 fileConfig(config.config_file_name)
 
 # 環境変数から DB URL を取得して、alembic.ini の設定を上書き
-config.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
+config.set_main_option('sqlalchemy.url', 'mysql+pymysql://addmin_user:admin@local-aurora-mysql:3306/gym_db')
 
 # モデルの Base を import
 import sys

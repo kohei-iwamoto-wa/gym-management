@@ -7,7 +7,8 @@ set -e
 # マイグレーションファイルの作成
 alembic --config /app/db/alembic.ini revision --autogenerate -m "create initial tables"
 
+ls -la
 # Alembic マイグレーションを実行
 alembic --config /app/db/alembic.ini upgrade head
 # アプリケーションを起動
-# exec uvicorn app.db.main:app --host 0.0.0.0 --port 8090
+exec uvicorn db.main:app --host 0.0.0.0 --port 8090
