@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y unzip curl && \
 COPY ./requirements.txt ./db/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r ./db/requirements.txt
 # アプリケーションをコピー
-COPY ./app /app/db
+COPY ./app /app
 # lsで確認
 RUN ls -la /app/db
 RUN chmod +x /app/db/entrypoint.sh

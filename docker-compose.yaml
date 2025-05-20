@@ -27,7 +27,7 @@ services:
       - mysql
     build:
       context: .
-      dockerfile: app/dynamo_app/Dockerfile
+      dockerfile: app/db/Dockerfile
     container_name: db-migration
     ports:
       - "5555:5555"
