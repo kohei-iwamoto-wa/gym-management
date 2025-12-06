@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS Backup for Aurora
+
+Parameters:
+  ProjectName:
+    Description: Project Name
+    Type: String
+
+Resources:
+  # バックアップボールト
+  AuroraBackupVault:
+    Type: AWS::Backup::BackupVault
+    Properties:
+      BackupVaultName: !Sub "${ProjectName}-aurora-backup-vault"
+
+  # バックアッププラン
+  AuroraBackupPlan:
+    Type: AWS::Backup::BackupPlan
+    DependsOn: AuroraBackupVault
+    Properties:
+      BackupPlan: 
+        BackupPlanName: !Sub "${ProjectName}-aurora-backup-plan"
+        BackupPlanRule: 
+          - EnableContinuousBackup: true
+            RuleName: !Sub "${ProjectName}-aurora-backup-rule"
+            ScheduleExpression: "cron(0 2 * * ? *)"
+            ScheduleExpressionTimezone: "Asia/Tokyo"
+            StartWindowMinutes: 60
+            TargetBackupVault: !Ref AuroraBackupVault
+            Lifecycle: 
+              DeleteAfterDays: 35
+
+  AuroraBackuoSelection:
+    Type: AWS::Backup::BackupSelection
+    Properties:
+      BackupPlanId: !Ref AuroraBackupPlan
+      BackupSelection:
+        SelectionName: !Sub "${ProjectName}-aurora-selection"
+        IamRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/AWSBackupDefaultServiceRole"
+        Resources:
+          - !ImportValue "project-rds-db-cluster-arn"

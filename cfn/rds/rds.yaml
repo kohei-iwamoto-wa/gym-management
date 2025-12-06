@@ -74,3 +74,10 @@ Resources:
       Engine: aurora-mysql
       PreferredMaintenanceWindow: 'sun:17:00-sun:17:30'
       PubliclyAccessible: false
+
+Outputs:
+  AuroraClusterArn:
+    Value: !Sub "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${RdsDbCluster}"
+    Export:
+      Name: !Sub "${ProjectName}-rds-db-cluster-arn"
+      
